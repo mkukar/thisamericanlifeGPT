@@ -58,13 +58,16 @@ if __name__ == "__main__":
         print('2. Upload: openai api fine_tunes.create -t {0} -m <BASE_MODEL>'.format(trainer.OUTPUT_FILENAME))
 
     elif args.action == 'run':
+        trainer = Trainer()
         if args.prompt is None or args.model_id is None or args.api_key is None:
             logging.error("--api-key, --prompt, and --model-id are required for run action")
             sys.exit(1)
         openai.api_key = args.api_key
         response = openai.Completion.create(
             model=args.model_id,
-            prompt=args.prompt + Trainer.PROMPT_END_TOKEN
+            prompt=args.prompt + Trainer.PROMPT_END_TOKEN,
+            stop=Trainer.COMPLETION_END_TOKEN,
+            max_tokens=(Trainer.MAX_TOKENS - trainer.count_tokens(args.prompt + Trainer.PROMPT_END_TOKEN))
         )
         print("Response:")
         pprint(response)
