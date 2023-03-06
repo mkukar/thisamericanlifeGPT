@@ -1,10 +1,11 @@
 # fine tunes gpt3 using data from scraper
+# Created by Michael Kukar 2023
+
+from scraper import Scraper
 
 import json
 import logging
 from transformers import GPT2TokenizerFast
-
-logging.basicConfig(format='%(levelname)s - %(asctime)s - %(message)s', level=logging.DEBUG)
 
 class Trainer:
 
@@ -12,11 +13,12 @@ class Trainer:
     COMPLETION_END_TOKEN = '###'
     COMPLETION_START_TOKEN = ' '
     MAX_TOKENS = 2048
+    OUTPUT_FILENAME='../training_data.jsonl'
 
     def __init__(self):
         self.tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
 
-    def load_scraper_data(self, filename='../episodes.json'):
+    def load_scraper_data(self, filename=Scraper.OUTPUT_FILENAME):
         with open(filename, 'r') as f:
             return json.load(f)
 
@@ -70,13 +72,13 @@ class Trainer:
             return False
 
     # must be saved in JSONL format ({"prompt": "<prompt text>", "completion": "<ideal generated text>"} on each line)
-    def save_training_data(self, trainingData, filename='../training_data.jsonl'):
+    def save_training_data(self, trainingData, filename):
         with open(filename, 'w') as f:
             for entry in trainingData:
                 f.write(json.dumps(entry) + '\n')
 
 
-    def run(self, filename='../training_data.jsonl', max_training_set=500):
+    def run(self, filename=OUTPUT_FILENAME, max_training_set=500):
         data = self.load_scraper_data()
         trainingData = self.format_data_for_training(data)
         if len(trainingData) > max_training_set:
@@ -84,7 +86,3 @@ class Trainer:
             trainingData = trainingData[:max_training_set]
         self.save_training_data(trainingData, filename=filename)
         logging.debug('Training data saved with size of {0} to {1}'.format(len(trainingData), filename))        
-
-if __name__ == "__main__":
-    trainer = Trainer()
-    trainer.run(max_training_set=1000)

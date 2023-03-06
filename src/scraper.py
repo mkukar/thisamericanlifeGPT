@@ -1,26 +1,23 @@
 # scrapes data from This American Life and formats into trainable data
+# Created by Michael Kukar 2023
 
 import requests
 from bs4 import BeautifulSoup
 import logging
 import json
 
-from pprint import pprint
-
-logging.basicConfig(format='%(levelname)s - %(asctime)s - %(message)s', level=logging.DEBUG)
-
 class Scraper:
 
     SOUP_PARSER = 'html.parser'
-
-    sourceUrl = 'https://thisamericanlife.org/'
-    transcriptUri = '{0}/transcript' # episode number
+    OUTPUT_FILENAME = '../episodes.json'
+    SOURCE_URL = 'https://thisamericanlife.org/'
+    TRANSCRIPT_URI = '{0}/transcript' # episode number
 
     def parse_transcript(self, episodeNumber):
         logging.debug('parsing transcript for episode {0}'.format(episodeNumber))
         transcriptData = {}
         
-        url = self.sourceUrl + self.transcriptUri.format(str(episodeNumber))
+        url = self.SOURCE_URL + self.TRANSCRIPT_URI.format(str(episodeNumber))
         page = requests.get(url)
         soup = BeautifulSoup(page.content, self.SOUP_PARSER)
 
@@ -55,7 +52,7 @@ class Scraper:
 
     def parse_summary(self, summaryLink, transcriptData):
         logging.debug('parsing summary for {0}'.format(summaryLink))
-        url = self.sourceUrl + summaryLink
+        url = self.SOURCE_URL + summaryLink
         page = requests.get(url)
         soup = BeautifulSoup(page.content, self.SOUP_PARSER)
 
@@ -74,7 +71,7 @@ class Scraper:
 
     def parse_act_summary(self, actSummaryLink):
         logging.debug('parsing act summary for {0}'.format(actSummaryLink))
-        url = self.sourceUrl + actSummaryLink
+        url = self.SOURCE_URL + actSummaryLink
         page = requests.get(url)
         soup = BeautifulSoup(page.content, self.SOUP_PARSER)
         summaryDiv = soup.find('div', class_='field field-name-body field-type-text-with-summary field-label-hidden')
@@ -114,11 +111,11 @@ class Scraper:
         fullData = self.parse_summary(transcriptData['episodeLinkName'], transcriptData)
         return fullData
 
-    def save_data(self, episode_data, filename='../episodes.json'):
+    def save_data(self, episode_data, filename):
         with open(filename, 'w') as f:
             json.dump(episode_data, f, indent=4)
 
-    def run(self, startEpisode=1, endEpisode=1):
+    def run(self, startEpisode=1, endEpisode=1, output_filename=OUTPUT_FILENAME):
         episodeData = []
         curEpisode = startEpisode
         while curEpisode <= endEpisode:
@@ -128,8 +125,4 @@ class Scraper:
                 logging.error("Failed to parse episode {0}, skipping...".format(curEpisode))
                 logging.error(e)
             curEpisode += 1
-        self.save_data(episodeData)
-
-if __name__ == "__main__":
-    scraper = Scraper()
-    scraper.run(startEpisode=1, endEpisode=750)
+        self.save_data(episodeData, filename=output_filename)
