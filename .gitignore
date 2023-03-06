@@ -1,4 +1,6 @@
-*/episodes.json
+**/episodes.json
+**/training_data.jsonl
+openai_api_key
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
