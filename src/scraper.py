@@ -3,6 +3,7 @@
 import requests
 from bs4 import BeautifulSoup
 import logging
+import json
 
 from pprint import pprint
 
@@ -51,11 +52,17 @@ class Scraper:
 
     def parse_summary(self, summaryLink, transcriptData):
         logging.debug('parsing summary for {0}'.format(summaryLink))
-
-        # add summary to acts section of transcriptData
         url = self.sourceUrl + summaryLink
         page = requests.get(url)
         soup = BeautifulSoup(page.content, self.SOUP_PARSER)
+
+        transcriptData['summary'] = ''
+        summaryDiv = soup.find('header', class_='episode-header').find('div', class_='field field-name-body field-type-text-with-summary field-label-hidden')
+        try:
+            transcriptData['summary'] = summaryDiv.find('p').text
+        except AttributeError as e:
+            transcriptData['summary'] = summaryDiv.find('div', class_='field-item even').text
+        
         for actLinks in soup.findAll('a', class_='goto goto-act'):
             for actId, actData in transcriptData['Acts'].items():
                 if actLinks.text.strip() in actData['name']:
@@ -104,13 +111,18 @@ class Scraper:
         fullData = self.parse_summary(transcriptData['episodeLinkName'], transcriptData)
         return fullData
 
+    def save_data(self, episode_data, filename='../episodes.json'):
+        with open(filename, 'w') as f:
+            json.dump(episode_data, f, indent=4)
+
     def run(self, startEpisode=1, endEpisode=1):
+        episodeData = []
         curEpisode = startEpisode
         while curEpisode <= endEpisode:
-            transcriptData = self.parse(curEpisode)
-            pprint(transcriptData)
+            episodeData.append(self.parse(curEpisode))
             curEpisode += 1
+        self.save_data(episodeData)
 
 if __name__ == "__main__":
     scraper = Scraper()
-    scraper.run(endEpisode=100)
+    scraper.run(endEpisode=750)
