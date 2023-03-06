@@ -17,7 +17,7 @@ class Scraper:
     transcriptUri = '{0}/transcript' # episode number
 
     def parse_transcript(self, episodeNumber):
-        logging.debug('parsing summary for episode {0}'.format(episodeNumber))
+        logging.debug('parsing transcript for episode {0}'.format(episodeNumber))
         transcriptData = {}
         
         url = self.sourceUrl + self.transcriptUri.format(str(episodeNumber))
@@ -46,7 +46,10 @@ class Scraper:
             except AttributeError:
                 # this means just use the previous speaker instead
                 speaker = previousSpeaker
-            speech = dialogue.find('p').text.strip()
+            speech = ""
+            for speechParagraph in dialogue.findAll('p'):
+                logging.debug(speechParagraph)
+                speech += speechParagraph.text.strip()
             actStr += speaker + seperator + speech + newline
         return actStr
 
@@ -119,10 +122,14 @@ class Scraper:
         episodeData = []
         curEpisode = startEpisode
         while curEpisode <= endEpisode:
-            episodeData.append(self.parse(curEpisode))
+            try:
+                episodeData.append(self.parse(curEpisode))
+            except Exception as e:
+                logging.error("Failed to parse episode {0}, skipping...".format(curEpisode))
+                logging.error(e)
             curEpisode += 1
         self.save_data(episodeData)
 
 if __name__ == "__main__":
     scraper = Scraper()
-    scraper.run(endEpisode=750)
+    scraper.run(startEpisode=1, endEpisode=750)
