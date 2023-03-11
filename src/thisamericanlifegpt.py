@@ -2,7 +2,7 @@
 # Created by Michael Kukar 2023
 
 from scraper import Scraper
-from trainer import Trainer
+from tamtrainer import TAMTrainer
 
 import argparse
 import logging
@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     elif args.action == 'train':
         print('Running trainer (this may take a while)...')
-        trainer = Trainer()
+        trainer = TAMTrainer()
         trainer.run(max_training_set=args.max_training_entries)
         print('Done! Output generated at {0}'.format(trainer.OUTPUT_FILENAME))
         print('Now that training data has been created, confirm the data was prepared correctly and then upload it to OpenAI')
@@ -58,16 +58,16 @@ if __name__ == "__main__":
         print('2. Upload: openai api fine_tunes.create -t {0} -m <BASE_MODEL>'.format(trainer.OUTPUT_FILENAME))
 
     elif args.action == 'run':
-        trainer = Trainer()
+        trainer = TAMTrainer()
         if args.prompt is None or args.model_id is None or args.api_key is None:
             logging.error("--api-key, --prompt, and --model-id are required for run action")
             sys.exit(1)
         openai.api_key = args.api_key
         response = openai.Completion.create(
             model=args.model_id,
-            prompt=args.prompt + Trainer.PROMPT_END_TOKEN,
-            stop=Trainer.COMPLETION_END_TOKEN,
-            max_tokens=(Trainer.MAX_TOKENS - trainer.count_tokens(args.prompt + Trainer.PROMPT_END_TOKEN))
+            prompt=args.prompt + TAMTrainer.PROMPT_END_TOKEN,
+            stop=TAMTrainer.COMPLETION_END_TOKEN,
+            max_tokens=(TAMTrainer.MAX_TOKENS - trainer.count_tokens(args.prompt + TAMTrainer.PROMPT_END_TOKEN))
         )
         print("Response:")
         pprint(response)

@@ -5,7 +5,8 @@
 
 ## Requirements
 - OpenAI Account
-- Python3
+- Python 3.7 to 3.10 (TSS dependency on windows does not support all versions)
+- espeak https://github.com/espeak-ng/espeak-ng/releases
 
 ## Setup
 
@@ -20,7 +21,7 @@ Get an API Key from openAI and set in your environment
 # Usage
 
 ## Scraping
-First you must scrape data from thisamericanlife.org to use in the training set
+First you must scrape data from thisamericanlife.org to use in the training set.
 
 `thisamericanlifegpt --action scrape --max-episodes <X>`
 
@@ -60,6 +61,10 @@ To generate a full episode, run the same prompt but give it a prologue, act (or 
 
 # Resources
 https://platform.openai.com/docs/guides/fine-tuning
+
+https://github.com/coqui-ai/TTS
+
+https://github.com/espeak-ng/espeak-ng/releases
 
 # Author
 Created by Michael Kukar in 2023
