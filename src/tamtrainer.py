@@ -7,13 +7,14 @@ import json
 import logging
 from transformers import GPT2TokenizerFast
 
-class Trainer:
+class TAMTrainer:
 
     PROMPT_END_TOKEN = '\n\n###\n\n'
     COMPLETION_END_TOKEN = '###'
     COMPLETION_START_TOKEN = ' '
     MAX_TOKENS = 2048
     OUTPUT_FILENAME='../training_data.jsonl'
+    PROMPT = 'Write a {0} for an episode of the This American Life podcast with the summary {1}{2}'
 
     def __init__(self):
         self.tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
@@ -47,7 +48,7 @@ class Trainer:
             actName = 'Act'
         else:
             actName = episodeData['Acts'][actId]['name']
-        return 'Write a {0} for an episode of the This American Life podcast with the summary {1}{2}'.format(
+        return self.PROMPT.format(
             actName.lower(), 
             episodeData['summary'], 
             self.PROMPT_END_TOKEN)
