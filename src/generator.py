@@ -13,7 +13,7 @@ class Generator:
 
     VOICE_MODEL = 'tts_models/en/vctk/vits'
     FIXED_VOICES = {
-        'Ira Glass' : 'p241'
+        'IRA GLASS' : 'p267'
     }
     EXCLUDED_VOICES = ['ED\n']
     PRONUNCIATION_FIXES = {
@@ -140,6 +140,7 @@ class Generator:
         tts.synthesizer.save_wav(wav=wavData, path=filename)
         
     def assign_voice(self, name, assignedVoices, tts):
+        name = name.upper()
         if name in assignedVoices.keys():
             return assignedVoices[name]
         elif name in self.FIXED_VOICES.keys():
