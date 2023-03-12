@@ -5,8 +5,6 @@ import openai
 import json
 from TTS.api import TTS
 
-from pprint import pprint
-
 from tamtrainer import TAMTrainer
 
 class Generator:
@@ -29,6 +27,8 @@ class Generator:
         'Created by Michael Kukar in 2023',
         'Thank you for listening!'
     ]
+
+    EPISODE_FOLDER = '../episodes/episode {0}'
 
     def __init__(self, apiKey, modelId):
         openai.api_key = apiKey
@@ -164,12 +164,12 @@ class Generator:
         with open(filename, 'r') as f:
             return json.load(f)
 
-    def run(self, summaryPrompt, numberOfActs=2, episodeFolder='../episodes/episode 3'):
-        #episodeData = self.query_episode_data(summaryPrompt, numberOfActs=numberOfActs)
-        #self.save_data(episodeData, '{0}/episodeData.json'.format(episodeFolder))
-        episodeData = self.load_data('{0}/episodeData.json'.format(episodeFolder))
+    def run(self, summaryPrompt, episodeNumber, numberOfActs=2, episodeFolder=EPISODE_FOLDER):
+        outputFolder = episodeFolder.format(episodeNumber)
+        episodeData = self.query_episode_data(summaryPrompt, numberOfActs=numberOfActs)
+        self.save_data(episodeData, '{0}/episodeData.json'.format(outputFolder))
+        episodeData = self.load_data('{0}/episodeData.json'.format(outputFolder))
         scriptData = self.parse_episode_data_to_script(episodeData)
-        pprint(scriptData)
-        self.generate_script(scriptData, '{0}/script.md'.format(episodeFolder))
-        self.generate_audio(scriptData, '{0}/audio.wav'.format(episodeFolder))
+        self.generate_script(scriptData, '{0}/script.md'.format(outputFolder))
+        self.generate_audio(scriptData, '{0}/audio.wav'.format(outputFolder))
 

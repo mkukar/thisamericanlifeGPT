@@ -3,12 +3,11 @@
 
 from scraper import Scraper
 from tamtrainer import TAMTrainer
+from generator import Generator
 
 import argparse
 import logging
 import sys
-import openai
-from pprint import pprint
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -21,6 +20,8 @@ def parse_arguments():
     parser.add_argument('--prompt', help='Prompt to run against trained model (required for run)')
     parser.add_argument('--model-id', help='ID of trained model (required for run)')
     parser.add_argument('--api-key', help='OpenAI API key (required for run)')
+    parser.add_argument('--episode-number', type=int, help='Episode number to store output (required for run)')
+    parser.add_argument('--acts', type=int, default=1, help='Number of acts to generate (default 1)')
     parser.add_argument('--debug', action='store_true', default=False, help='Prints debug logging messages')
     args = parser.parse_args()
 
@@ -34,6 +35,8 @@ def parse_arguments():
     elif args.action == 'run':
         print('\tPrompt               : {0}'.format(args.prompt))
         print('\tModel ID             : {0}'.format(args.model_id))
+        print('\tActs                 : {0}'.format(args.acts))
+        print('\tEpisode Number       : {0}'.format(args.episode_number))
     print('\tDebug Mode           : {0}'.format(args.debug))
     return args
 
@@ -58,16 +61,9 @@ if __name__ == "__main__":
         print('2. Upload: openai api fine_tunes.create -t {0} -m <BASE_MODEL>'.format(trainer.OUTPUT_FILENAME))
 
     elif args.action == 'run':
-        trainer = TAMTrainer()
-        if args.prompt is None or args.model_id is None or args.api_key is None:
-            logging.error("--api-key, --prompt, and --model-id are required for run action")
+        if args.prompt is None or args.model_id is None or args.api_key is None or args.episode_number is None:
+            logging.error("--api-key, --episode_number, --prompt, and --model-id are required for run action")
             sys.exit(1)
-        openai.api_key = args.api_key
-        response = openai.Completion.create(
-            model=args.model_id,
-            prompt=args.prompt + TAMTrainer.PROMPT_END_TOKEN,
-            stop=TAMTrainer.COMPLETION_END_TOKEN,
-            max_tokens=(TAMTrainer.MAX_TOKENS - trainer.count_tokens(args.prompt + TAMTrainer.PROMPT_END_TOKEN))
-        )
-        print("Response:")
-        pprint(response)
+        generator = Generator(args.api_key, args.model_id)
+        generator.run(args.prompt, args.episode_number, numberOfActs=args.acts)
+        print('Done! Episode generated at {0}'.format(Generator.EPISODE_FOLDER.format(args.episode_number)))
