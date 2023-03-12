@@ -22,6 +22,7 @@ def parse_arguments():
     parser.add_argument('--api-key', help='OpenAI API key (required for run)')
     parser.add_argument('--episode-number', type=int, help='Episode number to store output (required for run)')
     parser.add_argument('--acts', type=int, default=1, help='Number of acts to generate (default 1)')
+    parser.add_argument('--regenerate', action='store_true', default=False, help='Regenerates from existing data instead of making new queries (useful if you want different voices)')
     parser.add_argument('--debug', action='store_true', default=False, help='Prints debug logging messages')
     args = parser.parse_args()
 
@@ -36,6 +37,7 @@ def parse_arguments():
         print('\tPrompt               : {0}'.format(args.prompt))
         print('\tModel ID             : {0}'.format(args.model_id))
         print('\tActs                 : {0}'.format(args.acts))
+        print('\tRegenerate?          : {0}'.format(args.regenerate))
         print('\tEpisode Number       : {0}'.format(args.episode_number))
     print('\tDebug Mode           : {0}'.format(args.debug))
     return args
@@ -66,5 +68,5 @@ if __name__ == "__main__":
             logging.error("--api-key, --episode_number, --prompt, and --model-id are required for run action")
             sys.exit(1)
         generator = Generator(args.api_key, args.model_id)
-        if generator.run(args.prompt, args.episode_number, numberOfActs=args.acts):
+        if generator.run(args.prompt, args.episode_number, numberOfActs=args.acts, useExistingData=args.regenerate):
             print('Done! Episode generated at {0}'.format(Generator.EPISODE_FOLDER.format(args.episode_number)))
