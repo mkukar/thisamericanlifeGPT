@@ -3,6 +3,8 @@
 
 import openai
 import json
+import logging
+import os
 from TTS.api import TTS
 
 from tamtrainer import TAMTrainer
@@ -63,6 +65,7 @@ class Generator:
         return TAMTrainer.PROMPT.format(actName.lower(), summaryPrompt, TAMTrainer.PROMPT_END_TOKEN)
 
     def run_query(self, prompt):
+        logging.debug('Running query {0} on model {1}...'.format(prompt, self.modelId))
         return openai.Completion.create(
             model=self.modelId,
             prompt=prompt,
@@ -133,6 +136,7 @@ class Generator:
                     continue
                 else:
                     wavData.extend(tts.tts(fixed_speech, speaker=speaker_voice))
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         tts.synthesizer.save_wav(wav=wavData, path=filename)
         
     def assign_voice(self, name, assignedVoices, tts):
@@ -157,19 +161,33 @@ class Generator:
         return text
 
     def save_data(self, data, filename):
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, 'w') as f:
             json.dump(data, f, indent=4)
+        logging.debug('Saved data to {0}...'.format(filename))
     
     def load_data(self, filename):
         with open(filename, 'r') as f:
             return json.load(f)
 
-    def run(self, summaryPrompt, episodeNumber, numberOfActs=2, episodeFolder=EPISODE_FOLDER):
+    def run(self, summaryPrompt, episodeNumber, numberOfActs=2, episodeFolder=EPISODE_FOLDER, useExistingData=False):
         outputFolder = episodeFolder.format(episodeNumber)
-        episodeData = self.query_episode_data(summaryPrompt, numberOfActs=numberOfActs)
-        self.save_data(episodeData, '{0}/episodeData.json'.format(outputFolder))
-        episodeData = self.load_data('{0}/episodeData.json'.format(outputFolder))
-        scriptData = self.parse_episode_data_to_script(episodeData)
-        self.generate_script(scriptData, '{0}/script.md'.format(outputFolder))
-        self.generate_audio(scriptData, '{0}/audio.wav'.format(outputFolder))
-
+        if not useExistingData:
+            try:
+                episodeData = self.query_episode_data(summaryPrompt, numberOfActs=numberOfActs)
+                self.save_data(episodeData, '{0}/episodeData.json'.format(outputFolder))
+            except Exception as e:
+                logging.error("Failed to query episode data. Check your inputs.")
+                logging.error(e)
+                return False
+        else:
+            episodeData = self.load_data('{0}/episodeData.json'.format(outputFolder))
+        try:
+            scriptData = self.parse_episode_data_to_script(episodeData)
+            self.generate_script(scriptData, '{0}/script.md'.format(outputFolder))
+            self.generate_audio(scriptData, '{0}/audio.wav'.format(outputFolder))
+        except Exception as e:
+            logging.error("Failed to generate an episode from the episode data. Re-run ")
+            logging.error(e)
+            return False
+        return True

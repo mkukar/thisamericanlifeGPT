@@ -5,7 +5,7 @@
 
 ## Requirements
 - OpenAI Account and API Key
-- Python 3.7 to 3.10 (TSS dependency on windows does not support all versions)
+- Python 3.7 to 3.10 (TSS dependency does not support all versions)
 - espeak
   - https://github.com/espeak-ng/espeak-ng/releases
 

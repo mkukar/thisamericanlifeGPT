@@ -61,9 +61,10 @@ if __name__ == "__main__":
         print('2. Upload: openai api fine_tunes.create -t {0} -m <BASE_MODEL>'.format(trainer.OUTPUT_FILENAME))
 
     elif args.action == 'run':
+        print('Creating your episode (this may take a while)...')
         if args.prompt is None or args.model_id is None or args.api_key is None or args.episode_number is None:
             logging.error("--api-key, --episode_number, --prompt, and --model-id are required for run action")
             sys.exit(1)
         generator = Generator(args.api_key, args.model_id)
-        generator.run(args.prompt, args.episode_number, numberOfActs=args.acts)
-        print('Done! Episode generated at {0}'.format(Generator.EPISODE_FOLDER.format(args.episode_number)))
+        if generator.run(args.prompt, args.episode_number, numberOfActs=args.acts):
+            print('Done! Episode generated at {0}'.format(Generator.EPISODE_FOLDER.format(args.episode_number)))
