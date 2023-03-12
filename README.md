@@ -4,9 +4,10 @@
 # Setup/Requirements
 
 ## Requirements
-- OpenAI Account
+- OpenAI Account and API Key
 - Python 3.7 to 3.10 (TSS dependency on windows does not support all versions)
-- espeak https://github.com/espeak-ng/espeak-ng/releases
+- espeak
+  - https://github.com/espeak-ng/espeak-ng/releases
 
 ## Setup
 
@@ -14,9 +15,6 @@ Install requirements.txt file
 
 `pip install -r requirements.txt`
 
-Get an API Key from openAI and set in your environment
-
-`set OPENAI_API_KEY=YOURKEYHERE`
 
 # Usage
 
@@ -55,9 +53,13 @@ Example:
 
 You can run this by using the following command:
 
-`thisamericanlifegpt --action run --api-key <OPENAI_API_KEY> --model-id <MODEL_NAME_FROM_OPEN_AI> --prompt <PROMPT_IN_QUOTES>`
+`thisamericanlifegpt --action run --episode-number <EPISODE_NUMBER> --acts <NUMBER_OF_ACTS> --api-key <OPENAI_API_KEY> --model-id <MODEL_NAME_FROM_OPEN_AI> --prompt <PROMPT_IN_QUOTES>`
 
-To generate a full episode, run the same prompt but give it a prologue, act (or multiple acts), and credits section.
+Using the above example prompt:
+
+`thisamericanlifegpt --action run --episode-number 1 --acts 2 --api-key <OPENAI_API_KEY> --model-id <MODEL_NAME_FROM_OPEN_AI> --prompt "An episode on ai written by an ai"`
+
+This would generate Episode 1 with 2 acts (so Prologue, Act 1, Act 2, Credits) and create both the script and audio file.
 
 # Resources
 https://platform.openai.com/docs/guides/fine-tuning
